@@ -264,7 +264,7 @@ public class DeepLearning extends ModelBuilder<DeepLearningModel,DeepLearningMod
           throw new H2OIllegalArgumentException("Model type must be the same as for the checkpointed model.");
 
         //READ ONLY
-        DeepLearningParameters.Sanity.checkIfParameterChangeAllowed(previous._parms, _parms);
+        DeepLearningParameters.Sanity.checkIfParameterChangeAllowed(previous._input_parms, _parms);
 
         DataInfo dinfo;
         try {

@@ -78,7 +78,7 @@ public class KMeansModel extends ClusteringModel<KMeansModel,KMeansModel.KMeansP
     EffectiveParametersUtils.initFoldAssignment(_parms);
   }
   
-  public void initActualParamValues(int nclasses) {
+  public void initActualParamValuesAfterOutputSetup(int nclasses) {
     EffectiveParametersUtils.initCategoricalEncoding(_parms, nclasses, Model.Parameters.CategoricalEncodingScheme.Enum);
   }
 

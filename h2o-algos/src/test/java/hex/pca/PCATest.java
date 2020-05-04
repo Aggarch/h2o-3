@@ -1,6 +1,7 @@
 package hex.pca;
 
 import hex.DataInfo;
+import hex.Model;
 import hex.SplitFrame;
 import hex.generic.Generic;
 import hex.generic.GenericModel;
@@ -310,6 +311,7 @@ public class PCATest extends TestUtil {
           pcaParameters._transform = std;
           pcaParameters._max_iterations = 1000;
           pcaParameters._pca_method = PCAParameters.Method.Power;
+          pcaParameters._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
 
           model = new PCA(pcaParameters).trainModel().get();
 

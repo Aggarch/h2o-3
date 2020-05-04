@@ -40,7 +40,7 @@ public class DRFModel extends SharedTreeModelWithContributions<DRFModel, DRFMode
     EffectiveParametersUtils.initHistogramType(_parms);
   }
 
-  public void initActualParamValues(boolean isClassifier, int nclasses) {
+  public void initActualParamValuesAfterOutputSetup(boolean isClassifier, int nclasses) {
     EffectiveParametersUtils.initStoppingMetric(_parms, isClassifier, false);
     EffectiveParametersUtils.initCategoricalEncoding(_parms, nclasses, Parameters.CategoricalEncodingScheme.Enum);
   }

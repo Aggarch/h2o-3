@@ -530,6 +530,7 @@ public class DeepLearningTest extends TestUtil {
         dl._export_weights_and_biases = true;
         dl._hidden = new int[]{17, 11};
         dl._quiet_mode = false;
+        dl._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
 
         // make it reproducible
         dl._seed = 1234;
@@ -610,6 +611,7 @@ public class DeepLearningTest extends TestUtil {
         dl._reproducible = false;
         dl._replicate_training_data = false; //every node only has a piece of the data
         dl._force_load_balance = true; //use multi-node
+        dl._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
 
         dl._epochs = 10;
         dl._train_samples_per_iteration = frTrain.numRows()/100; //100 M/R steps per epoch

@@ -2,6 +2,7 @@ package hex.glm;
 
 import hex.DataInfo;
 import hex.GLMMetrics;
+import hex.Model;
 import hex.ModelMetricsRegressionGLM;
 import hex.glm.GLMModel.GLMParameters;
 import hex.glm.GLMModel.GLMParameters.Family;
@@ -655,6 +656,7 @@ public class GLMBasicTestRegression extends TestUtil {
     boolean naive_descent_exception_thrown = false;
     try {
       params._solver = Solver.COORDINATE_DESCENT_NAIVE;
+      params._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
       new GLM(params).trainModel().get();
       assertFalse("should've thrown, p-values only supported with IRLSM",true);
     } catch (H2OIllegalArgumentException t) {
@@ -663,11 +665,13 @@ public class GLMBasicTestRegression extends TestUtil {
     assertTrue(naive_descent_exception_thrown);
     try {
       params._solver = Solver.COORDINATE_DESCENT;
+      params._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
       new GLM(params).trainModel().get();
       assertFalse("should've thrown, p-values only supported with IRLSM",true);
     } catch(H2OModelBuilderIllegalArgumentException t) {
     }
     params._solver = Solver.IRLSM;
+    params._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
     GLM glm = new GLM(params);
     try {
       params._lambda = new double[]{1};
@@ -763,6 +767,7 @@ public class GLMBasicTestRegression extends TestUtil {
 //    GLEASON      0.91750972  0.1963285  4.67333842 2.963429e-06
 
     params._standardize = true;
+    params._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
 
     try {
       model = new GLM(params).trainModel().get();
@@ -802,6 +807,7 @@ public class GLMBasicTestRegression extends TestUtil {
     params._train = _airlines._key;
     params._response_column = "IsDepDelayed";
     params._ignored_columns = new String[]{"IsDepDelayed_REC"};
+    params._fold_assignment = Model.Parameters.FoldAssignmentScheme.AUTO;
     try {
       model = new GLM(params).trainModel().get();
       String[] names_expected = new String[] {"Intercept","fYearf1988","fYearf1989","fYearf1990","fYearf1991","fYearf1992","fYearf1993","fYearf1994","fYearf1995","fYearf1996","fYearf1997","fYearf1998","fYearf1999","fYearf2000","fDayofMonthf10","fDayofMonthf11","fDayofMonthf12","fDayofMonthf13","fDayofMonthf14","fDayofMonthf15","fDayofMonthf16","fDayofMonthf17","fDayofMonthf18","fDayofMonthf19","fDayofMonthf2","fDayofMonthf20","fDayofMonthf21","fDayofMonthf22","fDayofMonthf23","fDayofMonthf24", "fDayofMonthf25",  "fDayofMonthf26",  "fDayofMonthf27",  "fDayofMonthf28",  "fDayofMonthf29" , "fDayofMonthf3"  ,   "fDayofMonthf30" , "fDayofMonthf31",  "fDayofMonthf4", "fDayofMonthf5", "fDayofMonthf6", "fDayofMonthf7"  ,   "fDayofMonthf8" ,  "fDayofMonthf9"  , "fDayOfWeekf2" ,   "fDayOfWeekf3"   , "fDayOfWeekf4"  ,  "fDayOfWeekf5",      "fDayOfWeekf6" ,   "fDayOfWeekf7"  ,  "DepTime",    "ArrTime",    "UniqueCarrierCO",  "UniqueCarrierDL",   "UniqueCarrierHP", "UniqueCarrierPI", "UniqueCarrierTW" ,"UniqueCarrierUA" ,"UniqueCarrierUS", "UniqueCarrierWN" ,  "OriginABQ",  "OriginACY",  "OriginALB",  "OriginATL",  "OriginAUS",  "OriginAVP",    "OriginBDL",  "OriginBGM",  "OriginBHM",  "OriginBNA",  "OriginBOS",  "OriginBTV",    "OriginBUF",  "OriginBUR",  "OriginBWI",  "OriginCAE",  "OriginCHO",  "OriginCHS",    "OriginCLE",  "OriginCLT",  "OriginCMH",  "OriginCOS",  "OriginCRW",  "OriginCVG",    "OriginDAY",  "OriginDCA",  "OriginDEN",  "OriginDFW",  "OriginDSM",  "OriginDTW",    "OriginERI",  "OriginEWR",  "OriginFLL",  "OriginGSO",  "OriginHNL",  "OriginIAD",    "OriginIAH",  "OriginICT",  "OriginIND",  "OriginISP",  "OriginJAX",  "OriginJFK",   "OriginLAS",  "OriginLAX",  "OriginLEX",  "OriginLGA",  "OriginLIH",  "OriginLYH",   "OriginMCI",  "OriginMCO",  "OriginMDT",  "OriginMDW",  "OriginMFR",  "OriginMHT",   "OriginMIA",  "OriginMKE",  "OriginMLB",  "OriginMRY",  "OriginMSP",  "OriginMSY",   "OriginMYR",  "OriginOAK",  "OriginOGG",  "OriginOMA",  "OriginORD",  "OriginORF",   "OriginPBI",  "OriginPHF",  "OriginPHL",  "OriginPHX",  "OriginPIT",  "OriginPSP",   "OriginPVD",  "OriginPWM",  "OriginRDU",  "OriginRIC",  "OriginRNO",  "OriginROA",   "OriginROC",  "OriginRSW",  "OriginSAN",  "OriginSBN",  "OriginSCK",  "OriginSDF",   "OriginSEA",  "OriginSFO",  "OriginSJC",  "OriginSJU",  "OriginSLC",  "OriginSMF",   "OriginSNA",  "OriginSRQ",  "OriginSTL",  "OriginSTX",  "OriginSWF",  "OriginSYR",   "OriginTLH",  "OriginTPA",  "OriginTRI",  "OriginTUS",  "OriginTYS",  "OriginUCA",   "DestABQ",    "DestACY",    "DestALB",    "DestATL",    "DestAVP",    "DestBDL",     "DestBGM",    "DestBNA",    "DestBOS",    "DestBTV",    "DestBUF",    "DestBUR",     "DestBWI",    "DestCAE",    "DestCAK",    "DestCHA",    "DestCHS",    "DestCLE",     "DestCLT",    "DestCMH",    "DestDAY",    "DestDCA",    "DestDEN",    "DestDFW",     "DestDTW",    "DestELM",    "DestERI",    "DestEWR",    "DestFAT",    "DestFAY",     "DestFLL",    "DestFNT",    "DestGEG",    "DestGRR",    "DestGSO",    "DestGSP",     "DestHNL",    "DestHTS",    "DestIAD",    "DestIAH",    "DestICT",    "DestIND",     "DestISP",    "DestJAX",    "DestJFK",    "DestKOA",    "DestLAS",    "DestLAX",     "DestLEX",    "DestLGA",    "DestLIH",    "DestLYH",    "DestMCI",    "DestMCO",     "DestMDT",    "DestMDW",    "DestMHT",    "DestMIA",    "DestMRY",    "DestMSY",     "DestOAJ",    "DestOAK",    "DestOGG",    "DestOMA",    "DestORD",    "DestORF",     "DestORH",    "DestPBI",    "DestPDX",    "DestPHF",    "DestPHL",    "DestPHX",     "DestPIT",    "DestPSP",    "DestPVD",    "DestRDU",    "DestRIC",    "DestRNO",     "DestROA",    "DestROC",    "DestRSW",    "DestSAN",    "DestSCK",    "DestSDF",     "DestSEA",    "DestSFO",    "DestSJC",    "DestSMF",    "DestSNA",    "DestSTL",     "DestSWF",    "DestSYR",    "DestTOL",    "DestTPA",    "DestTUS",    "DestUCA",     "Distance"};

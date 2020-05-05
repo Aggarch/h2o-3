@@ -148,7 +148,7 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
       int lidx = 0;
       int bestId = 0;
       int cnt = 0;
-      for (; lidx < lmin_max; ++lidx) {
+      for (; lidx < lmin_max; ++lidx) { // search through lambda again
         double testDev = 0;
         for (int i = 0; i < cvModelBuilders.length; ++i) {
           GLM g = (GLM) cvModelBuilders[i];
@@ -2032,12 +2032,12 @@ public class GLM extends ModelBuilder<GLMModel,GLMParameters,GLMOutput> {
       _scoringInterval = Math.max(_scoringInterval,20*scoringTime); // at most 5% overhead for scoring
     }
 
-    protected Submodel computeSubmodel(int i,double lambda) {
+    protected Submodel computeSubmodel(int i,double lambda,double beta) {
       Submodel sm;
       if(lambda >= _lmax && _state.l1pen() > 0)
-        _model.addSubmodel(sm = new Submodel(lambda,getNullBeta(),_state._iter,_nullDevTrain,_nullDevTest));
+        _model.addSubmodel(sm = new Submodel(lambda,beta,getNullBeta(),_state._iter,_nullDevTrain,_nullDevTest));
       else {  // this is also the path for HGLM model
-        sm = new Submodel(lambda, _state.beta(),_state._iter,-1,-1);
+        sm = new Submodel(lambda, beta, _state.beta(),_state._iter,-1,-1);
         if (_parms._HGLM) // add random coefficients for random effects/columns
           sm.ubeta = Arrays.copyOf(_state.ubeta(), _state.ubeta().length);
         _model.addSubmodel(sm);

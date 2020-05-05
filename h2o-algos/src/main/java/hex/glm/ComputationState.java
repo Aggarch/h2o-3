@@ -166,8 +166,8 @@ public final class ComputationState {
   public void setLambdaMax(double lmax) {
     _lambdaMax = lmax;
   }
-  public void setLambda(double lambda) {
-    adjustToNewLambda(0, _lambda);
+  public void setLambda(double lambda, double alpha) {
+    adjustToNewLambda(0, _lambda, alpha);
     // strong rules are to be applied on the gradient with no l2 penalty
     // NOTE: we start with lambdaOld being 0, not lambda_max
     // non-recursive strong rules should use lambdaMax instead of _lambda
@@ -210,7 +210,8 @@ public final class ComputationState {
     return "iter=" + _iter + " lmb=" + GLM.lambdaFormatter.format(_lambda) + " obj=" + MathUtils.roundToNDigits(objective(),4) + " imp=" + GLM.lambdaFormatter.format(_relImprovement) + " bdf=" + GLM.lambdaFormatter.format(_betaDiff);
   }
 
-  private void adjustToNewLambda(double lambdaNew, double lambdaOld) {
+  // re-calculate l2pen and gradient
+  private void adjustToNewLambda(double lambdaNew, double lambdaOld, double alpha) {
     double ldiff = lambdaNew - lambdaOld;
     if(ldiff == 0 || l2pen() == 0) return;
     double l2pen = .5*ArrayUtils.l2norm2(_beta,true);

@@ -173,13 +173,15 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
 
   public void update(double [] beta, double devianceTrain, double devianceTest,int iter){
     int id = _output._submodels.length-1;
-    _output._submodels[id] = new Submodel(_output._submodels[id].lambda_value,beta,iter,devianceTrain,devianceTest);
+    _output._submodels[id] = new Submodel(_output._submodels[id].lambda_value,_output._submodels[id].alpha_value,beta,
+            iter,devianceTrain,devianceTest);
     _output.setSubmodelIdx(id);
   }
 
   public void update(double [] beta, double[] ubeta, double devianceTrain, double devianceTest,int iter){
     int id = _output._submodels.length-1;
-    Submodel sm = new Submodel(_output._submodels[id].lambda_value,beta,iter,devianceTrain,devianceTest);
+    Submodel sm = new Submodel(_output._submodels[id].lambda_value,_output._submodels[id].alpha_value,beta,iter,
+            devianceTrain,devianceTest);
     sm.ubeta = Arrays.copyOf(ubeta, ubeta.length);
     _output._submodels[id] = sm;
     _output.setSubmodelIdx(id);
@@ -995,6 +997,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
 
   public static class Submodel extends Iced {
     public final double lambda_value;
+    public final double alpha_value;
     public final int    iteration;
     public final double devianceTrain;
     public final double devianceTest;
@@ -1017,8 +1020,9 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       return idxs != null?idxs.length:(ArrayUtils.countNonzeros(beta));
     }
 
-    public Submodel(double lambda , double [] beta, int iteration, double devTrain, double devTest){
+    public Submodel(double lambda , double alpha, double [] beta, int iteration, double devTrain, double devTest){
       this.lambda_value = lambda;
+      this.alpha_value = alpha;
       this.iteration = iteration;
       this.devianceTrain = devTrain;
       this.devianceTest = devTest;
@@ -1163,7 +1167,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       this(dinfo,column_names,column_types, domains,coefficient_names,binomial);
       assert !ArrayUtils.hasNaNsOrInfs(beta);
       _global_beta=beta;
-      _submodels = new Submodel[]{new Submodel(0,beta,-1,Double.NaN,Double.NaN)};
+      _submodels = new Submodel[]{new Submodel(0,0,beta,-1,Double.NaN,Double.NaN)};
     }
 
     public GLMOutput(DataInfo dinfo, String[] column_names, String[] column_types, String[][] domains, String[] coefficient_names, boolean binomial, double[] beta, double[] ubeta) {
@@ -1171,7 +1175,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       assert !ArrayUtils.hasNaNsOrInfs(beta);
       _global_beta=beta;
       _ubeta = ubeta;
-      Submodel sm = new Submodel(0,beta,-1,Double.NaN,Double.NaN);
+      Submodel sm = new Submodel(0,0,beta,-1,Double.NaN,Double.NaN);
       sm.ubeta = Arrays.copyOf(ubeta, ubeta.length);
       _submodels = new Submodel[]{sm};
     }

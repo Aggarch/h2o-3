@@ -28,7 +28,7 @@ public final class ComputationState {
   final int _nclasses;
   private final GLMParameters _parms;
   private BetaConstraint _bc;
-  final double _alpha;
+  double _alpha;  // cannot be final, need to change when alpha is an array
   double[] _ymu;
   double [] _u;
   double [] _z;
@@ -163,11 +163,13 @@ public final class ComputationState {
 
   public GLMGradientSolver gslvr(){return _gslvr;}
   public double lambda(){return _lambda;}
+  public double alpha() {return _alpha;}
   public void setLambdaMax(double lmax) {
     _lambdaMax = lmax;
   }
-  public void setLambda(double lambda, double alpha) {
-    adjustToNewLambda(0, _lambda, alpha);
+  public void setAlpha(double alpha) {_alpha=alpha;}
+  public void setLambda(double lambda) {
+    adjustToNewLambda(0, _lambda);
     // strong rules are to be applied on the gradient with no l2 penalty
     // NOTE: we start with lambdaOld being 0, not lambda_max
     // non-recursive strong rules should use lambdaMax instead of _lambda
@@ -207,11 +209,11 @@ public final class ComputationState {
   public void dropActiveData(){_activeData = null;}
 
   public String toString() {
-    return "iter=" + _iter + " lmb=" + GLM.lambdaFormatter.format(_lambda) + " obj=" + MathUtils.roundToNDigits(objective(),4) + " imp=" + GLM.lambdaFormatter.format(_relImprovement) + " bdf=" + GLM.lambdaFormatter.format(_betaDiff);
+    return "iter=" + _iter + " lmb=" + GLM.lambdaFormatter.format(_lambda) + " alpha=" + 
+            GLM.lambdaFormatter.format(_alpha)+ " obj=" + MathUtils.roundToNDigits(objective(),4) + " imp=" + GLM.lambdaFormatter.format(_relImprovement) + " bdf=" + GLM.lambdaFormatter.format(_betaDiff);
   }
 
-  // re-calculate l2pen and gradient
-  private void adjustToNewLambda(double lambdaNew, double lambdaOld, double alpha) {
+  private void adjustToNewLambda(double lambdaNew, double lambdaOld) {
     double ldiff = lambdaNew - lambdaOld;
     if(ldiff == 0 || l2pen() == 0) return;
     double l2pen = .5*ArrayUtils.l2norm2(_beta,true);

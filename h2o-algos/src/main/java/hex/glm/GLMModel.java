@@ -52,7 +52,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
   }
 
 
-  public RegularizationPath getRegularizationPath() {
+  public RegularizationPath getRegularizationPath() { // will be invoked even without lambda_search=true
     RegularizationPath rp = new RegularizationPath();
     rp._coefficient_names = _output._coefficient_names;
     int N = _output._submodels.length;
@@ -1079,12 +1079,18 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
     String[] _random_coefficient_names; // for HGLM
     String[] _random_column_names;
     public int _best_lambda_idx; // lambda which minimizes deviance on validation (if provided) or train (if not)
+    public int _best_alpha_idx;  // alpha index which minimizes deviance on validation if provided else on train
+    public int _best_submodel_idx;
     public int _lambda_1se = -1; // lambda_best + sd(lambda); only applicable if running lambda search with nfold
-    public int _selected_lambda_idx; // lambda which minimizes deviance on validation (if provided) or train (if not)
-    public double lambda_best(){return _submodels.length == 0 ? -1 : _submodels[_best_lambda_idx].lambda_value;}
+    public int _selected_lambda_idx; // lambda index which is being worked on
+    public int _selected_alpha_idx;     // alpha index which is being worked on
+    public int _selected_submodel_idx;  // submodel index is being worked
+    public double lambda_best(){return _submodels.length == 0 ? -1 : _submodels[_best_submodel_idx].lambda_value;}
     public double dispersion(){ return _dispersion;}
     public double lambda_1se(){return _lambda_1se == -1 || _lambda_1se >= _submodels.length?-1:_submodels.length == 0 ? -1 : _submodels[_lambda_1se].lambda_value;}
-    public double lambda_selected(){return _submodels[_selected_lambda_idx].lambda_value;}
+    public double lambda_selected(){
+      return _submodels[_selected_submodel_idx].lambda_value;
+    }
     double[] _global_beta;
     double[] _ubeta;  // HGLM:  random coefficients
     private double[] _zvalues;
@@ -1121,7 +1127,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
     public boolean _multinomial;
     public boolean _ordinal;
 
-    public int rank() { return _submodels[_selected_lambda_idx].rank();}
+    public int rank() { return _submodels[_selected_submodel_idx].rank();}
 
     public boolean isStandardized() {
       return _dinfo._predictor_transform == TransformType.STANDARDIZE;
@@ -1251,7 +1257,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       return res;
     }
 
-    public Submodel pickBestModel() {
+    public Submodel pickBestModel() { // best model is chosen according to deviance
       int bestId = 0;
       Submodel best = _submodels[0];
       for(int i = 1; i < _submodels.length; ++i) {
@@ -1261,7 +1267,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
           best = sm;
         }
       }
-      setSubmodelIdx(_best_lambda_idx = bestId);
+      setSubmodelIdx(_best_submodel_idx = bestId);
       return best;
     }
 
@@ -1315,7 +1321,8 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
 
 
     public void setSubmodelIdx(int l){
-      _selected_lambda_idx = l;
+      //_selected_lambda_idx = l;
+      _selected_submodel_idx = l;
       if (_random_coefficient_names != null) 
         _ubeta = Arrays.copyOf(_submodels[l].ubeta, _submodels[l].ubeta.length);
       if(_multinomial || _ordinal) {
@@ -1332,7 +1339,7 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       }
     }
     public double [] beta() { return _global_beta;}
-    public Submodel bestSubmodel(){ return _submodels[_best_lambda_idx];}
+    public Submodel bestSubmodel(){ return _submodels[_best_submodel_idx];}
 
     public void setSubmodel(double lambdaCVEstimate) {
       for(int i = 0; i < _submodels.length; ++i)
@@ -1416,12 +1423,12 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
       _output._model_summary.set(0, 1, _parms._link.toString());
       String regularization = "None";
       if (_parms._lambda != null && !(_parms._lambda.length == 1 && _parms._lambda[0] == 0)) { // have regularization
-        if (_parms._alpha[0] == 0)
+        if (_parms._alpha[_output._selected_alpha_idx] == 0)
           regularization = "Ridge ( lambda = ";
-        else if (_parms._alpha[0] == 1)
+        else if (_parms._alpha[_output._selected_alpha_idx] == 1)
           regularization = "Lasso (lambda = ";
         else
-          regularization = "Elastic Net (alpha = " + MathUtils.roundToNDigits(_parms._alpha[0], 4) + ", lambda = ";
+          regularization = "Elastic Net (alpha = " + MathUtils.roundToNDigits(_parms._alpha[_output._selected_alpha_idx], 4) + ", lambda = ";
         regularization = regularization + MathUtils.roundToNDigits(_parms._lambda[_output._selected_lambda_idx], 4) + " )";
       }
       _output._model_summary.set(0, 2, regularization);
